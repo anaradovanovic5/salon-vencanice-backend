@@ -1,7 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package fon.bg.ac.rs.salonzavencanice.service;
 
 import fon.bg.ac.rs.salonzavencanice.dto.impl.KlijentDto;
@@ -44,15 +41,15 @@ public class KlijentService {
     }
 
     public KlijentDto update(int id, KlijentDto dto) {
-        repo.findById(id)
+        var postojeci = repo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Klijent", id));
-        dto.setIdKlijent(id);
+        dto.setIdKlijent(postojeci.getIdKlijent());
         return mapper.toDto(repo.save(mapper.toEntity(dto)));
     }
 
     public void delete(int id) {
-        repo.findById(id)
+        var klijent = repo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Klijent", id));
-        repo.deleteById(id);
+        repo.delete(klijent);
     }
 }

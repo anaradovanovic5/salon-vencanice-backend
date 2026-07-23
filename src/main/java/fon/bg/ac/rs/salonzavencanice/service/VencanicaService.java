@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package fon.bg.ac.rs.salonzavencanice.service;
 
 import fon.bg.ac.rs.salonzavencanice.dto.impl.VencanicaDto;
@@ -44,7 +40,7 @@ public class VencanicaService {
     }
 
     public List<VencanicaDto> findSlobodne() {
-        return repo.findSlobodne().stream()
+        return repo.findByStatus(0).stream()
                 .map(mapper::toDto).collect(Collectors.toList());
     }
 
@@ -54,15 +50,17 @@ public class VencanicaService {
     }
 
     public VencanicaDto update(int id, VencanicaDto dto) {
-        repo.findById(id)
+        var postojeca = repo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Vencanica", id));
-        dto.setIdVencanica(id);
+        dto.setIdVencanica(postojeca.getIdVencanica());
+        // Status venčanice (slobodna/iznajmljena) sme da se menja isključivo kroz IznajmljivanjeService
+        dto.setStatus(postojeca.getStatus());
         return mapper.toDto(repo.save(mapper.toEntity(dto)));
     }
 
     public void delete(int id) {
-        repo.findById(id)
+        var vencanica = repo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Vencanica", id));
-        repo.deleteById(id);
+        repo.delete(vencanica);
     }
 }

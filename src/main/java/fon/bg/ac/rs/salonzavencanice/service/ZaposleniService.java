@@ -1,15 +1,13 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package fon.bg.ac.rs.salonzavencanice.service;
 
 import fon.bg.ac.rs.salonzavencanice.dto.impl.ZaposleniDto;
+import fon.bg.ac.rs.salonzavencanice.entity.impl.Uloga;
 import fon.bg.ac.rs.salonzavencanice.exception.EntityNotFoundException;
 import fon.bg.ac.rs.salonzavencanice.mapper.impl.ZaposleniMapper;
 import fon.bg.ac.rs.salonzavencanice.repository.impl.ZaposleniRepository;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -21,10 +19,12 @@ public class ZaposleniService {
 
     private final ZaposleniRepository repo;
     private final ZaposleniMapper mapper;
+    private final PasswordEncoder passwordEncoder;
 
-    public ZaposleniService(ZaposleniRepository repo, ZaposleniMapper mapper) {
+    public ZaposleniService(ZaposleniRepository repo, ZaposleniMapper mapper, PasswordEncoder passwordEncoder) {
         this.repo = repo;
         this.mapper = mapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<ZaposleniDto> findAll() {
@@ -40,19 +40,32 @@ public class ZaposleniService {
 
     public ZaposleniDto create(ZaposleniDto dto) {
         dto.setIdZaposleni(null);
+        if (dto.getUloga() == null) {
+            dto.setUloga(Uloga.ZAPOSLENI);
+        }
+        dto.setLozinka(passwordEncoder.encode(dto.getLozinka()));
         return mapper.toDto(repo.save(mapper.toEntity(dto)));
     }
 
     public ZaposleniDto update(int id, ZaposleniDto dto) {
-        repo.findById(id)
+        var postojeci = repo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Zaposleni", id));
         dto.setIdZaposleni(id);
+        // ako lozinka nije poslata (menja se samo ime/prezime), zadrzi staru hesiranu
+        if (dto.getLozinka() == null || dto.getLozinka().isBlank()) {
+            dto.setLozinka(postojeci.getLozinka());
+        } else {
+            dto.setLozinka(passwordEncoder.encode(dto.getLozinka()));
+        }
+        if (dto.getUloga() == null) {
+            dto.setUloga(postojeci.getUloga());
+        }
         return mapper.toDto(repo.save(mapper.toEntity(dto)));
     }
 
     public void delete(int id) {
-        repo.findById(id)
+        var zaposleni = repo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Zaposleni", id));
-        repo.deleteById(id);
+        repo.delete(zaposleni);
     }
 }

@@ -1,1 +1,32 @@
-target/ 
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+
+### Eclipse / NetBeans ###
+.classpath
+.project
+.settings/
+nbproject/
+nb-configuration.xml
+
+### VS Code ###
+.vscode/
+
+### Node / React (frontend) ###
+node_modules/
+build/
+.env
+.env.local
+npm-debug.log*
+
+### OS ###
+.DS_Store
+Thumbs.db

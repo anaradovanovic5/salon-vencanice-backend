@@ -1,7 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package fon.bg.ac.rs.salonzavencanice.service;
 import fon.bg.ac.rs.salonzavencanice.dto.impl.GradDto;
 import fon.bg.ac.rs.salonzavencanice.exception.EntityNotFoundException;
@@ -44,15 +41,15 @@ public class GradService {
     }
 
     public GradDto update(int id, GradDto dto) {
-        gradRepository.findById(id)
+        var postojeci = gradRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Grad", id));
-        dto.setIdGrad(id);
+        dto.setIdGrad(postojeci.getIdGrad());
         return gradMapper.toDto(gradRepository.save(gradMapper.toEntity(dto)));
     }
 
     public void delete(int id) {
-        gradRepository.findById(id)
+        var grad = gradRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Grad", id));
-        gradRepository.deleteById(id);
+        gradRepository.delete(grad);
     }
 }

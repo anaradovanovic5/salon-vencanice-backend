@@ -1,7 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package fon.bg.ac.rs.salonzavencanice.service;
 
 import fon.bg.ac.rs.salonzavencanice.dto.impl.IznajmljivanjeDto;
@@ -46,7 +43,7 @@ public class IznajmljivanjeService {
     }
 
     public List<IznajmljivanjeDto> findByKlijent(int klijentId) {
-        return repo.findByKlijent(klijentId).stream()
+        return repo.findByKlijent_IdKlijent(klijentId).stream()
                 .map(mapper::toDto).collect(Collectors.toList());
     }
 
@@ -59,7 +56,9 @@ public class IznajmljivanjeService {
         Vencanica vencanica = vencanicaRepo.findById(dto.getVencanicaId())
                 .orElseThrow(() -> new EntityNotFoundException(
                 "Vencanica", dto.getVencanicaId()));
-
+        if (dto.getDatumVracanja().isBefore(dto.getDatumUzimanja())) {
+            throw new IllegalStateException("Datum vracanja ne moze biti pre datuma uzimanja.");
+        }
         if (vencanica.getStatus() != 0) {
             throw new IllegalStateException(
                     "Vencanica sa ID " + dto.getVencanicaId() + " nije slobodna!");
@@ -71,6 +70,24 @@ public class IznajmljivanjeService {
         dto.setIdIznajmljivanje(null);
         Iznajmljivanje saved = repo.save(mapper.toEntity(dto));
         return mapper.toDto(saved);
+    }
+
+    public IznajmljivanjeDto update(int id, IznajmljivanjeDto dto) {
+        Iznajmljivanje postojece = repo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Iznajmljivanje", id));
+
+        if (dto.getDatumUzimanja() == null || dto.getDatumVracanja() == null) {
+            throw new IllegalArgumentException("Datum uzimanja i datum vracanja su obavezni.");
+        }
+        if (dto.getDatumVracanja().isBefore(dto.getDatumUzimanja())) {
+            throw new IllegalStateException("Datum vracanja ne moze biti pre datuma uzimanja.");
+        }
+
+        postojece.setDatumUzimanja(dto.getDatumUzimanja());
+        postojece.setDatumVracanja(dto.getDatumVracanja());
+
+        Iznajmljivanje sacuvano = repo.save(postojece);
+        return mapper.toDto(sacuvano);
     }
 
     public void delete(int id) {

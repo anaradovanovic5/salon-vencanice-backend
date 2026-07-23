@@ -1,10 +1,12 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package fon.bg.ac.rs.salonzavencanice.entity.impl;
 
 import jakarta.persistence.*;
+import java.util.Collection;
+import java.util.List;
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  *
@@ -12,7 +14,10 @@ import jakarta.persistence.*;
  */
 @Entity
 @Table(name = "zaposleni")
-public class Zaposleni {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Zaposleni implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,50 +28,43 @@ public class Zaposleni {
     private String korisnickoIme;
     private String lozinka;
 
-    public Zaposleni() {
+    @Enumerated(EnumType.STRING)
+    private Uloga uloga;
+
+    //Spring Security
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_" + uloga.name()));
     }
 
-    public Zaposleni(int idZaposleni) {
-        this.idZaposleni = idZaposleni;
-    }
-
-    public Integer getIdZaposleni() {
-        return idZaposleni;
-    }
-
-    public void setIdZaposleni(Integer idZaposleni) {
-        this.idZaposleni = idZaposleni;
-    }
-
-    public String getIme() {
-        return ime;
-    }
-
-    public void setIme(String ime) {
-        this.ime = ime;
-    }
-
-    public String getPrezime() {
-        return prezime;
-    }
-
-    public void setPrezime(String prezime) {
-        this.prezime = prezime;
-    }
-
-    public String getKorisnickoIme() {
-        return korisnickoIme;
-    }
-
-    public void setKorisnickoIme(String korisnickoIme) {
-        this.korisnickoIme = korisnickoIme;
-    }
-
-    public String getLozinka() {
+    @Override
+    public String getPassword() {
         return lozinka;
     }
 
-    public void setLozinka(String lozinka) {
-        this.lozinka = lozinka;
+    @Override
+    public String getUsername() {
+        return korisnickoIme;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }
